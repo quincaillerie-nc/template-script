@@ -29,10 +29,10 @@ sys.path.insert(0, str(MODULES_DIR))
 from _loader import load_module
 
 # Chargement des modules
-_fm     = load_module("file-manager",        "file_manager.py")
-_dbf    = load_module("dbf-loader",          "dbf_loader.py")
-_mailer = load_module("quincaillerie-mailer", "mailer.py")
-_log    = load_module("logger-manager",      "logger.py")
+_fm     = load_module("file-manager",         "file_manager.py")
+_dbf    = load_module("dbf-loader",           "dbf_loader.py")
+_mailer = load_module("quincaillerie-mailer",  "mailer.py")
+_log    = load_module("logger-manager",       "logger.py")
 
 # Fonctions exposées
 generer_nom_fichier    = _fm.generer_nom_fichier
@@ -45,8 +45,6 @@ init_logger            = _log.init_logger
 # =====================================================
 # INITIALISATION LOGGER
 # =====================================================
-# Le nom passé ici apparaîtra dans les logs et définit
-# le sous-dossier dans log_scripts/
 logger = init_logger("template")
 
 # =====================================================
@@ -63,8 +61,8 @@ def exemple_file_manager():
     logger.info("--- Exemple file_manager ---")
     import openpyxl
 
-    nom     = generer_nom_fichier("template_test", "xlsx")
-    chemin  = generer_chemin_fichier(nom)
+    nom    = generer_nom_fichier("template_test", "xlsx")
+    chemin = generer_chemin_fichier(nom)
 
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -79,10 +77,14 @@ def exemple_file_manager():
 
 
 def exemple_dbf_loader():
-    """Démo : chargement d'un DBF réseau."""
+    """Démo : chargement du DBF article via le réseau."""
     logger.info("--- Exemple dbf_loader ---")
-    logger.info("Appel : df = get_dbf('qc/article.dbf')")
-    logger.info("(non exécuté dans le template — réseau requis)")
+    try:
+        df = get_dbf("qc/article.dbf")
+        logger.info(f"✅ {len(df)} lignes chargées depuis article.dbf")
+        logger.info(f"   Colonnes : {list(df.columns[:5])}")
+    except Exception as e:
+        logger.error(f"❌ Erreur DBF : {e}")
 
 
 def exemple_mailer(chemin_fichier=None):
@@ -126,13 +128,13 @@ def main():
     logger.info("=" * 60)
 
     try:
-        # --- Étape 1 : file manager ---
+        # Étape 1 : file manager
         chemin = exemple_file_manager()
 
-        # --- Étape 2 : dbf loader (info seulement) ---
+        # Étape 2 : dbf loader
         exemple_dbf_loader()
 
-        # --- Étape 3 : mailer ---
+        # Étape 3 : mailer
         exemple_mailer(chemin_fichier=chemin)
 
         logger.info("=" * 60)
